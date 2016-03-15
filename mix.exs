@@ -29,7 +29,7 @@ defmodule RethinkdbEcto.Mixfile do
   defp deps do
     [
       {:rethinkdb, github: "hamiltop/rethinkdb-elixir"},
-      {:ecto, "~> 1.1"},
+      {:ecto, "~> 2.0.0-beta"},
       {:mock, "~> 0.1.1", only: :test}
     ]
   end

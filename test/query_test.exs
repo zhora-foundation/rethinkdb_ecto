@@ -1,14 +1,20 @@
 defmodule QueryTest do
   use ExUnit.Case
-  import RethinkDB.Lambda
+
+  import Ecto.Query, only: [from: 2]
+
+  alias RethinkDB.Query, as: ReQL
+  alias RethinkDB.Connection, as: ReC
 
   setup do
     Application.put_env(:rethinkdb_ecto_test, TestRepo, [])
 
-    {:ok, conn} = RethinkDB.Connection.start_link
+    {:ok, conn} = ReC.start_link
+    ReQL.table_create("posts") |> ReC.run(conn)
+    ReQL.table("posts") |> ReQL.delete |> ReC.run(conn)
+
     {:ok, _} = TestRepo.start_link
-    RethinkDB.Query.table_create("posts") |> RethinkDB.Connection.run(conn)
-    {:ok, model} = TestRepo.insert(%TestModel{title: "yay"})
+    {:ok, model} = TestRepo.insert(%TestModel{title: "yay", date: Ecto.DateTime.utc})
 
     {:ok, model: model}
   end
@@ -17,16 +23,17 @@ defmodule QueryTest do
     assert model.title == "yay"
   end
 
-  test "insert queries with Ecto.Date should work" do
-    date = Ecto.Date.utc
-    {:ok, model} = TestRepo.insert(%TestModel{date: date})
-    assert model.date == date
+  test "insert queries with Ecto.DateTime should work" do
+    dt = Ecto.DateTime.utc
+    {:ok, model} = TestRepo.insert(%TestModel{date: dt})
+    assert model.date == dt
   end
 
-  test "insert queries with Ecto.DateTime should work" do
-    date = Ecto.DateTime.utc
-    {:ok, model} = TestRepo.insert(%TestModel{date: date})
-    assert model.date == date
+  test "insert many models" do
+    result = TestRepo.insert_all(TestModel,
+      [%{title: "1"}, %{title: "2"}, %{title: "3"}])
+
+    assert result == {3, []}
   end
 
   test "get one queries work", %{model: model} do
@@ -44,20 +51,18 @@ defmodule QueryTest do
     assert model_2 in from_db
   end
 
-  test "filtered queries work", %{model: model}  do
-    {:ok, model_2} = TestRepo.insert(%TestModel{title: "yoyo"})
+  test "filtered queries work", %{model: _}  do
+    {:ok, _} = TestRepo.insert(%TestModel{title: "yoyo"})
 
-    query = RethinkDB.Query.table("posts") |>
-      RethinkDB.Query.filter(lambda(fn post ->
-        post[:title] == "yoyo"
-      end))
+    from_db =
+      TestRepo.all(from m in TestModel, where: m.title == "yoyo")
+      |> List.first
 
-    from_db = TestRepo.query(TestModel, query) |> List.first
     assert from_db.title == "yoyo"
   end
 
   test "update queries work", %{model: model} do
-    update_changeset = TestRepo.changeset(model, %{title: "yayay"})
+    update_changeset = TestModel.changeset(model, %{title: "yayay"})
     {:ok, updated_model} = TestRepo.update(update_changeset)
     assert updated_model.title == "yayay"
   end
