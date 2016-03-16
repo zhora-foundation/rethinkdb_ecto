@@ -21,7 +21,7 @@ defmodule RethinkDB.Ecto do
     end
   end
 
-  def application, do: RethinkDB.Ecto
+  def application, do: :rethinkdb_ecto
 
   def child_spec(_repo, opts), do: Spec.worker(Connection, [opts])
 
