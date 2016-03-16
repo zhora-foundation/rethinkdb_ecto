@@ -88,7 +88,8 @@ defmodule RethinkDB.Ecto do
             &{process_record(&1, process, fields, schema_fields), &2 + 1})
           {count, records}
         catch
-          :error, {:badmap, 1} ->
+          # FIXME
+          :error, {:badmap, _} ->
             {:ok, [data]}
         end
       %{data: data} ->
