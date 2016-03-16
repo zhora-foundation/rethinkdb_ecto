@@ -5,13 +5,14 @@ defmodule RethinkDB.Ecto.Storage do
 
       alias RethinkDB.Record
       alias RethinkDB.Response
-      alias RethinkDB.Query, as: Q
+      alias RethinkDB.Query, as: ReQL
+      alias RethinkDB.Connection, as: ReC
 
       def storage_up(opts) do
-        db = Dict.fetch!(opts, :database)
+        db = Dict.fetch!(opts, :db)
         # TODO: add host and port
         {:ok, pid} = RethinkDB.Connection.start_link([])
-        result = Q.db_create(db) |> Q.run(pid)
+        result = ReQL.db_create(db) |> ReC.run(pid)
         case result do
           %Response{data: %{"e" => 4100000, "r" => r}} ->
             already_exists = "Database `#{db}` already exists."
@@ -24,10 +25,12 @@ defmodule RethinkDB.Ecto.Storage do
       end
 
       def storage_down(opts) do
-        db = Dict.fetch!(opts, :database)
+        IO.puts(" ---------- storage_down")
+        IO.inspect(opts)
+        db = Dict.fetch!(opts, :db)
         # TODO: add host and port
         {:ok, pid} = RethinkDB.Connection.start_link([])
-        result = Q.db_drop(db) |> Q.run(pid)
+        result = ReQL.db_drop(db) |> ReC.run(pid)
         case result do
           %Response{data: %{"e" => 4100000, "r" => r}} ->
             does_not_exist = "Database `#{db}` does not exist."

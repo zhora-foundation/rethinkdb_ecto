@@ -53,6 +53,6 @@ defmodule TestModel do
   end
 end
 
-Application.put_env(:rethinkdb_ecto_test, TestRepo, [database: "test"])
+Application.put_env(:rethinkdb_ecto_test, TestRepo, [db: "test"])
 
 ExUnit.start()

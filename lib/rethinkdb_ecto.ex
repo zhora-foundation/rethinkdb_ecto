@@ -2,7 +2,7 @@ defmodule RethinkDB.Ecto do
   @behaviour Ecto.Adapter
 
   use RethinkDB.Ecto.Migration
-  # use RethinkDB.Ecto.Storage
+  use RethinkDB.Ecto.Storage
   # use RethinkDB.Ecto.Transaction
 
   alias RethinkDB.Query
