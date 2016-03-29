@@ -36,6 +36,7 @@ defmodule RethinkDB.Ecto do
   def dumpers(_primitive, type), do: [type]
 
   def autogenerate(:id), do: nil
+  def autogenerate(:embed_id), do: Ecto.UUID.generate
   def autogenerate(:binary_id), do: Ecto.UUID.generate
 
   def prepare(fun, query), do: {:nocache, {fun, query}}
