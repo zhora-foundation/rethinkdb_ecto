@@ -66,6 +66,9 @@ defmodule RethinkDB.Ecto.NormalizedQuery do
       _ -> {k, value}
     end
   end
+  defp normalize_field({k, v}) when is_map(v) do
+    {k, normalize_fields(v)}
+  end
   defp normalize_field(kv), do: kv
 
   defp normalize_query(query, params) do
